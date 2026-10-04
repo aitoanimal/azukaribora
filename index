@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>保護猫ボランティア管理</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    h1 { margin-bottom: 10px; }
+    form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    label { display: block; margin: 5px 0; }
+    input[type="text"] { width: 250px; padding: 4px; }
+    button { padding: 6px 12px; margin-top: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .cat-list { font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>保護猫預かりボランティア管理</h1>
+
+  <!-- ボランティア登録フォーム -->
+  <form id="volunteerForm">
+    <h2>① 預かりボランティアさんの登録</h2>
+    <label>
+      ボランティアさんの名前：
+      <input type="text" id="volunteerName" required>
+    </label>
+    <button type="submit">ボランティアを追加</button>
+  </form>
+
+  <!-- 猫登録フォーム -->
+  <form id="catForm">
+    <h2>② 猫の登録（チーム名・猫の名前）</h2>
+    <label>
+      ボランティアさんの名前（既に登録済みの方）：
+      <input type="text" id="catVolunteerName" required>
+    </label>
+    <label>
+      猫のチーム名：
+      <input type="text" id="catTeamName" required>
+    </label>
+    <label>
+      猫の名前：
+      <input type="text" id="catName" required>
+    </label>
+    <button type="submit">猫を追加</button>
+  </form>
+
+  <!-- リアルタイム一覧 -->
+  <h2>①に対して②が何匹いるかが分かるリスト</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ボランティアさんの名前</th>
+        <th>預かり頭数</th>
+        <th>猫一覧（チーム名＋猫の名前）</th>
+      </tr>
+    </thead>
+    <tbody id="volunteerTableBody">
+      <!-- JSで動的に追加 -->
+    </tbody>
+  </table>
+
+  <script>
+    // ボランティアごとのデータ構造
+    const volunteers = {}; // { volunteerName: { cats: [ {team, name}, ... ] } }
+
+    const volunteerForm = document.getElementById('volunteerForm');
+    const catForm = document.getElementById('catForm');
+    const volunteerTableBody = document.getElementById('volunteerTableBody');
+
+    // ボランティア追加
+    volunteerForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('volunteerName');
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      if (!volunteers[name]) {
+        volunteers[name] = { cats: [] };
+        renderTable();
+      } else {
+        alert('このボランティアさんは既に登録されています。');
+      }
+      nameInput.value = '';
+    });
+
+    // 猫追加
+    catForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const volunteerNameInput = document.getElementById('catVolunteerName');
+      const teamInput = document.getElementById('catTeamName');
+      const catNameInput = document.getElementById('catName');
+
+      const volunteerName = volunteerNameInput.value.trim();
+      const teamName = teamInput.value.trim();
+      const catName = catNameInput.value.trim();
+
+      if (!volunteerName || !teamName || !catName) return;
+
+      if (!volunteers[volunteerName]) {
+        alert('先にボランティアさんを登録してください。');
+        return;
+      }
+
+      volunteers[volunteerName].cats.push({
+        team: teamName,
+        name: catName
+      });
+
+      renderTable();
+
+      volunteerNameInput.value = '';
+      teamInput.value = '';
+      catNameInput.value = '';
+    });
+
+    // テーブル描画
+    function renderTable() {
+      volunteerTableBody.innerHTML = '';
+
+      Object.keys(volunteers).forEach(volName => {
+        const data = volunteers[volName];
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        tdName.textContent = volName;
+
+        const tdCount = document.createElement('td');
+        tdCount.textContent = data.cats.length;
+
+        const tdCats = document.createElement('td');
+        if (data.cats.length === 0) {
+          tdCats.textContent = 'なし';
+        } else {
+          const list = data.cats.map(cat => `${cat.team} / ${cat.name}`).join('、 ');
+          const span = document.createElement('span');
+          span.className = 'cat-list';
+          span.textContent = list;
+          tdCats.appendChild(span);
+        }
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdCount);
+        tr.appendChild(tdCats);
+
+        volunteerTableBody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
