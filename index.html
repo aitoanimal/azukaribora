@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>保護猫ボランティア管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
@@ -10,6 +12,7 @@
       margin: 0;
       padding: 0;
     }
+
     header {
       background: linear-gradient(to right, #fceabb, #f8b500);
       padding: 15px 20px;
@@ -19,64 +22,88 @@
       color: #333;
       font-weight: bold;
       font-size: 1.4em;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
+
     /* ハンバーガーメニュー */
     .menu-icon {
       cursor: pointer;
-      font-size: 1.6em;
+      font-size: 1.8em;
+      user-select: none;
     }
+
     nav {
       display: none;
-      position: absolute;
+      position: fixed;
       top: 60px;
-      right: 20px;
+      right: 10px;
       background: #fff;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 250px;
-      z-index: 100;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.15);
+      width: 280px;
+      z-index: 2000;
     }
+
     nav.active {
       display: block;
     }
+
     nav h3 {
       background: #f8b500;
       color: white;
       margin: 0;
-      padding: 10px;
-      border-radius: 8px 8px 0 0;
+      padding: 12px;
+      border-radius: 10px 10px 0 0;
+      font-size: 1.1em;
     }
+
     nav form {
-      padding: 10px;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
     }
+
+    nav form:last-child {
+      border-bottom: none;
+    }
+
     label {
       display: block;
       margin: 8px 0;
     }
+
     input[type="text"], select {
       width: 100%;
-      padding: 6px;
+      padding: 8px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 6px;
+      font-size: 1em;
     }
+
     button {
       background-color: #f8b500;
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
+      padding: 10px 16px;
+      border-radius: 6px;
       cursor: pointer;
       margin-top: 10px;
+      width: 100%;
+      font-size: 1em;
     }
+
     button:hover {
       background-color: #e0a800;
     }
+
     main {
       padding: 20px;
-      max-width: 900px;
+      max-width: 1000px;
       margin: auto;
     }
+
     h2 {
       font-size: 1.4em;
       color: #444;
@@ -84,25 +111,42 @@
       padding-bottom: 5px;
       margin-bottom: 15px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      font-size: 0.95em;
     }
+
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 10px;
       text-align: left;
     }
+
     th {
       background-color: #fff3cd;
     }
-    .cat-list {
-      font-size: 0.9em;
-      color: #555;
+
+    /* スマホ対応 */
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.2em;
+      }
+
+      table, th, td {
+        font-size: 0.85em;
+      }
+
+      nav {
+        width: 90%;
+        right: 5%;
+      }
     }
   </style>
 </head>
+
 <body>
   <header>
     保護猫ボランティア管理
@@ -112,6 +156,7 @@
   <!-- ハンバーガーメニュー -->
   <nav id="menu">
     <h3>メニュー</h3>
+
     <form id="volunteerForm">
       <h4>預かりボランティアさんの登録</h4>
       <label>ボランティアさんの名前：
@@ -122,6 +167,7 @@
       </label>
       <button type="submit">ボランティアを追加</button>
     </form>
+
     <form id="catForm">
       <h4>猫の登録</h4>
       <label>ボランティアさんの名前：
