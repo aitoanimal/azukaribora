@@ -5,9 +5,9 @@
   <title>Human & Animal Network - 預かり猫一覧</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <!-- Firebase SDK（deferで読み込み順を安定化） -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
   <style>
     body {
@@ -308,21 +308,34 @@
     </div>
   </div>
 
+  <!-- JavaScript（ページ末尾に配置） -->
   <script>
     /* ------------------------------
        Firebase 初期化
     ------------------------------ */
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MSG_ID",
-      appId: "YOUR_APP_ID"
-    };
+    let app, db;
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const firebaseConfig = {
+          apiKey: "YOUR_API_KEY",
+          authDomain: "YOUR_AUTH_DOMAIN",
+          projectId: "YOUR_PROJECT_ID",
+          storageBucket: "YOUR_STORAGE_BUCKET",
+          messagingSenderId: "YOUR_MSG_ID",
+          appId: "YOUR_APP_ID"
+        };
+
+        app = firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+
+        await loadData();
+      } catch (e) {
+        console.error("Firebase 初期化エラー:", e);
+      }
+
+      initUI();
+    });
 
     /* ------------------------------
        データ構造
@@ -356,71 +369,70 @@
     }
 
     /* ------------------------------
-       UI 要素
+       UI 初期化（ハンバーガーメニュー復活）
     ------------------------------ */
-    const volunteerForm = document.getElementById('volunteerForm');
-    const catForm = document.getElementById('catForm');
-    const volunteerTableBody = document.getElementById('volunteerTableBody');
-    const catVolunteerSelect = document.getElementById('catVolunteerName');
-    const menuIcon = document.getElementById('menuIcon');
-    const menu = document.getElementById('menu');
+    function initUI() {
+      const menuIcon = document.getElementById('menuIcon');
+      const menu = document.getElementById('menu');
 
-    menuIcon.addEventListener('click', () => {
-      menu.classList.toggle('active');
-    });
-
-    /* ------------------------------
-       ボランティア追加
-    ------------------------------ */
-    volunteerForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      const name = document.getElementById('volunteerName').value.trim();
-      const maxKittens = parseInt(document.getElementById('maxKittens').value.trim());
-      const maxAdults = parseInt(document.getElementById('maxAdults').value.trim());
-
-      if (!name || !maxKittens || !maxAdults) return;
-
-      volunteers[name] = {
-        maxKittens,
-        maxAdults,
-        cats: []
-      };
-
-      await saveData();
-      renderTable();
-
-      document.getElementById('volunteerName').value = '';
-      document.getElementById('maxKittens').value = '';
-      document.getElementById('maxAdults').value = '';
-    });
-
-    /* ------------------------------
-       猫追加
-    ------------------------------ */
-    catForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      const volunteerName = catVolunteerSelect.value;
-      const teamName = document.getElementById('catTeamName').value.trim();
-      const catName = document.getElementById('catName').value.trim();
-
-      if (!volunteerName || !teamName || !catName) return;
-
-      volunteers[volunteerName].cats.push({
-        team: teamName,
-        name: catName
+      menuIcon.addEventListener('click', () => {
+        menu.classList.toggle('active');
       });
 
-      await saveData();
-      renderTable();
+      setupForms();
+    }
 
-      document.getElementById('catTeamName').value = '';
-      document.getElementById('catName').value = '';
-    });
+    /* ------------------------------
+       フォーム設定
+    ------------------------------ */
+    function setupForms() {
+      const volunteerForm = document.getElementById('volunteerForm');
+      const catForm = document.getElementById('catForm');
+
+      volunteerForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const name = document.getElementById('volunteerName').value.trim();
+        const maxKittens = parseInt(document.getElementById('maxKittens').value.trim());
+        const maxAdults = parseInt(document.getElementById('maxAdults').value.trim());
+
+        volunteers[name] = {
+          maxKittens,
+          maxAdults,
+          cats: []
+        };
+
+        await saveData();
+        renderTable();
+
+        document.getElementById('volunteerName').value = '';
+        document.getElementById('maxKittens').value = '';
+        document.getElementById('maxAdults').value = '';
+      });
+
+      catForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const volunteerName = document.getElementById('catVolunteerName').value;
+        const teamName = document.getElementById('catTeamName').value.trim();
+        const catName = document.getElementById('catName').value.trim();
+
+        volunteers[volunteerName].cats.push({
+          team: teamName,
+          name: catName
+        });
+
+        await saveData();
+        renderTable();
+
+        document.getElementById('catTeamName').value = '';
+        document.getElementById('catName').value = '';
+      });
+    }
 
     /* ------------------------------
        テーブル描画
     ------------------------------ */
     function renderTable() {
+      const volunteerTableBody = document.getElementById('volunteerTableBody');
       volunteerTableBody.innerHTML = '';
 
       Object.keys(volunteers).forEach(volName => {
@@ -483,7 +495,9 @@
        ボランティア選択肢更新
     ------------------------------ */
     function updateVolunteerSelect() {
+      const catVolunteerSelect = document.getElementById('catVolunteerName');
       catVolunteerSelect.innerHTML = '<option value="">選択してください</option>';
+
       Object.keys(volunteers).forEach(name => {
         const option = document.createElement('option');
         option.value = name;
@@ -531,8 +545,6 @@
       closeModal();
       renderTable();
     }
-
-    /* ------------------------------
-       初期ロード
-    ------------------------------ */
-    loadData();
+  </script>
+</body>
+</html>
