@@ -153,7 +153,29 @@
       color: #d08c5b;
     }
 
-    .edit-btn, .delete-btn {
+    .cat-name {
+      cursor: pointer;
+      display: inline-block;
+      padding: 4px 0;
+    }
+
+    .delete-btn {
+      background: #e38b8b;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85em;
+      color: #fff;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .delete-btn:hover {
+      background: #d66f6f;
+    }
+
+    .edit-btn {
       background: #f7c8a5;
       border: none;
       padding: 6px 10px;
@@ -164,16 +186,8 @@
       margin-top: 6px;
     }
 
-    .delete-btn {
-      background: #e38b8b;
-    }
-
     .edit-btn:hover {
       background: #f3b48c;
-    }
-
-    .delete-btn:hover {
-      background: #d66f6f;
     }
 
   </style>
@@ -281,11 +295,6 @@
           cats: []
         };
 
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        catVolunteerSelect.appendChild(option);
-
         saveData();
         renderTable();
       } else {
@@ -325,11 +334,18 @@
         const tr = document.createElement('tr');
 
         const catsHTML = data.cats
-          .map((cat, index) =>
-            `${cat.team} / ${cat.name} 
-             <button class="delete-btn" onclick="deleteCat('${volName}', ${index})">削除</button>`
-          )
-          .join("<br>");
+          .map((cat, index) => `
+            <div>
+              <span class="cat-name" onclick="toggleDelete('${volName}', ${index})">
+                ${cat.team} / ${cat.name}
+              </span>
+              <button class="delete-btn" id="delete-${volName}-${index}"
+                onclick="deleteCat('${volName}', ${index})">
+                削除
+              </button>
+            </div>
+          `)
+          .join("");
 
         tr.innerHTML = `
           <td>${volName}</td>
@@ -348,6 +364,17 @@
       updateVolunteerSelect();
     }
 
+    function toggleDelete(volName, index) {
+      const btn = document.getElementById(`delete-${volName}-${index}`);
+      btn.style.display = btn.style.display === "inline-block" ? "none" : "inline-block";
+    }
+
+    function deleteCat(volName, index) {
+      volunteers[volName].cats.splice(index, 1);
+      saveData();
+      renderTable();
+    }
+
     function updateVolunteerSelect() {
       catVolunteerSelect.innerHTML = '<option value="">選択してください</option>';
       Object.keys(volunteers).forEach(name => {
@@ -356,12 +383,6 @@
         option.textContent = name;
         catVolunteerSelect.appendChild(option);
       });
-    }
-
-    function deleteCat(volName, index) {
-      volunteers[volName].cats.splice(index, 1);
-      saveData();
-      renderTable();
     }
 
     function editVolunteer(volName) {
