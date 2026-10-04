@@ -8,42 +8,49 @@
   <style>
     body {
       font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-      background: #fffaf0;
+      background: #faf8f5;
       margin: 0;
       padding: 0;
+      color: #333;
     }
 
+    /* Header */
     header {
-      background: linear-gradient(to right, #fceabb, #f8b500);
-      padding: 15px 20px;
+      background: #ffffff;
+      padding: 18px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: #333;
-      font-weight: bold;
-      font-size: 1.4em;
+      border-bottom: 1px solid #e5e2df;
       position: sticky;
       top: 0;
       z-index: 1000;
     }
 
-    /* ハンバーガーメニュー */
+    header .title {
+      font-size: 1.4em;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    /* Hamburger */
     .menu-icon {
       cursor: pointer;
       font-size: 1.8em;
       user-select: none;
+      color: #444;
     }
 
     nav {
       display: none;
       position: fixed;
-      top: 60px;
-      right: 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.15);
-      width: 280px;
+      top: 70px;
+      right: 20px;
+      background: #ffffff;
+      border: 1px solid #e5e2df;
+      border-radius: 8px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+      width: 300px;
       z-index: 2000;
     }
 
@@ -52,17 +59,16 @@
     }
 
     nav h3 {
-      background: #f8b500;
-      color: white;
       margin: 0;
-      padding: 12px;
-      border-radius: 10px 10px 0 0;
+      padding: 14px;
       font-size: 1.1em;
+      border-bottom: 1px solid #e5e2df;
+      background: #faf8f5;
     }
 
     nav form {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
+      padding: 14px;
+      border-bottom: 1px solid #f0eeec;
     }
 
     nav form:last-child {
@@ -71,67 +77,88 @@
 
     label {
       display: block;
-      margin: 8px 0;
+      margin: 10px 0 6px;
+      font-size: 0.9em;
+      color: #555;
     }
 
     input[type="text"], select {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1em;
+      padding: 10px;
+      border: 1px solid #d8d5d2;
+      border-radius: 4px;
+      background: #fff;
+      font-size: 0.95em;
     }
 
     button {
-      background-color: #f8b500;
+      background-color: #d8b98b;
       color: white;
       border: none;
       padding: 10px 16px;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 12px;
       width: 100%;
       font-size: 1em;
+      letter-spacing: 0.03em;
     }
 
     button:hover {
-      background-color: #e0a800;
+      background-color: #c7a77a;
     }
 
+    /* Main */
     main {
-      padding: 20px;
+      padding: 30px 20px;
       max-width: 1000px;
       margin: auto;
     }
 
     h2 {
-      font-size: 1.4em;
-      color: #444;
-      border-bottom: 2px solid #f8b500;
-      padding-bottom: 5px;
-      margin-bottom: 15px;
+      font-size: 1.3em;
+      font-weight: 500;
+      margin-bottom: 20px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #d8d5d2;
+      letter-spacing: 0.03em;
     }
 
+    /* Table */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.95em;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.05);
     }
 
     th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
+      padding: 14px;
       text-align: left;
+      border-bottom: 1px solid #f0eeec;
+      font-size: 0.95em;
     }
 
     th {
-      background-color: #fff3cd;
+      background-color: #faf8f5;
+      font-weight: 500;
+      color: #555;
     }
 
-    /* スマホ対応 */
+    td:last-child {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Responsive */
     @media (max-width: 600px) {
-      header {
+      header .title {
         font-size: 1.2em;
       }
 
@@ -149,51 +176,53 @@
 
 <body>
   <header>
-    保護猫ボランティア管理
+    <div class="title">保護猫ボランティア管理</div>
     <div class="menu-icon" id="menuIcon">☰</div>
   </header>
 
-  <!-- ハンバーガーメニュー -->
+  <!-- Hamburger Menu -->
   <nav id="menu">
     <h3>メニュー</h3>
 
     <form id="volunteerForm">
       <h4>預かりボランティアさんの登録</h4>
-      <label>ボランティアさんの名前：
-        <input type="text" id="volunteerName" required>
-      </label>
-      <label>預かりMAX頭数：
-        <input type="text" id="maxCats" required>
-      </label>
-      <button type="submit">ボランティアを追加</button>
+      <label>ボランティアさんの名前：</label>
+      <input type="text" id="volunteerName" required>
+
+      <label>預かりMAX頭数：</label>
+      <input type="text" id="maxCats" required>
+
+      <button type="submit">追加</button>
     </form>
 
     <form id="catForm">
       <h4>猫の登録</h4>
-      <label>ボランティアさんの名前：
-        <select id="catVolunteerName" required>
-          <option value="">選択してください</option>
-        </select>
-      </label>
-      <label>猫のチーム名：
-        <input type="text" id="catTeamName" required>
-      </label>
-      <label>猫の名前：
-        <input type="text" id="catName" required>
-      </label>
-      <button type="submit">猫を追加</button>
+
+      <label>ボランティアさん：</label>
+      <select id="catVolunteerName" required>
+        <option value="">選択してください</option>
+      </select>
+
+      <label>猫のチーム名：</label>
+      <input type="text" id="catTeamName" required>
+
+      <label>猫の名前：</label>
+      <input type="text" id="catName" required>
+
+      <button type="submit">追加</button>
     </form>
   </nav>
 
   <main>
     <h2>預かり猫一覧</h2>
+
     <table>
       <thead>
         <tr>
-          <th>ボランティアさんの名前</th>
+          <th>ボランティアさん</th>
           <th>預かり頭数</th>
-          <th>預かりMAX頭数</th>
-          <th>猫一覧（チーム名＋猫の名前）</th>
+          <th>MAX頭数</th>
+          <th>猫一覧</th>
         </tr>
       </thead>
       <tbody id="volunteerTableBody"></tbody>
@@ -255,21 +284,13 @@
         const data = volunteers[volName];
         const tr = document.createElement('tr');
 
-        const tdName = document.createElement('td');
-        tdName.textContent = volName;
+        tr.innerHTML = `
+          <td>${volName}</td>
+          <td>${data.cats.length}</td>
+          <td>${data.max}</td>
+          <td>${data.cats.length ? data.cats.map(cat => `${cat.team} / ${cat.name}`).join('、 ') : 'なし'}</td>
+        `;
 
-        const tdCount = document.createElement('td');
-        tdCount.textContent = data.cats.length;
-
-        const tdMax = document.createElement('td');
-        tdMax.textContent = data.max;
-
-        const tdCats = document.createElement('td');
-        tdCats.textContent = data.cats.length
-          ? data.cats.map(cat => `${cat.team} / ${cat.name}`).join('、 ')
-          : 'なし';
-
-        tr.append(tdName, tdCount, tdMax, tdCats);
         volunteerTableBody.appendChild(tr);
       });
     }
