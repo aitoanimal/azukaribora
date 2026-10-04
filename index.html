@@ -190,6 +190,38 @@
       background: #f3b48c;
     }
 
+    /* モーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    .modal-content {
+      background: #fffdf8;
+      padding: 20px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #d08c5b;
+      border-bottom: 2px solid #f3e4c8;
+      padding-bottom: 8px;
+    }
+
+    .cancel-btn {
+      background: #bbb;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -253,8 +285,28 @@
     </table>
   </main>
 
+  <!-- 編集モーダル -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3>ボランティア情報の編集</h3>
+
+      <label>名前：</label>
+      <input type="text" id="editName">
+
+      <label>子猫MAX頭数：</label>
+      <input type="text" id="editKittens">
+
+      <label>成猫MAX頭数：</label>
+      <input type="text" id="editAdults">
+
+      <button onclick="saveEdit()">保存</button>
+      <button class="cancel-btn" onclick="closeModal()">キャンセル</button>
+    </div>
+  </div>
+
   <script>
     const volunteers = {};
+    let editingVolunteer = null;
 
     function saveData() {
       localStorage.setItem("volunteers", JSON.stringify(volunteers));
@@ -348,13 +400,17 @@
           .join("");
 
         tr.innerHTML = `
-          <td>${volName}</td>
+          <td>
+            <span style="cursor:pointer; color:#d08c5b;" onclick="openEditModal('${volName}')">
+              ${volName}
+            </span>
+          </td>
           <td>${data.maxKittens}</td>
           <td>${data.maxAdults}</td>
           <td>${data.cats.length}</td>
           <td>${catsHTML || 'なし'}</td>
           <td>
-            <button class="edit-btn" onclick="editVolunteer('${volName}')">編集</button>
+            <button class="edit-btn" onclick="openEditModal('${volName}')">編集</button>
           </td>
         `;
 
@@ -385,25 +441,37 @@
       });
     }
 
-    function editVolunteer(volName) {
-      const newName = prompt("新しい名前を入力してください", volName);
-      if (!newName) return;
-
-      const newKittens = prompt("子猫MAX頭数を入力してください", volunteers[volName].maxKittens);
-      const newAdults = prompt("成猫MAX頭数を入力してください", volunteers[volName].maxAdults);
-
-      if (!newKittens || !newAdults) return;
-
+    function openEditModal(volName) {
+      editingVolunteer = volName;
       const data = volunteers[volName];
-      delete volunteers[volName];
+
+      document.getElementById("editName").value = volName;
+      document.getElementById("editKittens").value = data.maxKittens;
+      document.getElementById("editAdults").value = data.maxAdults;
+
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    function saveEdit() {
+      const newName = document.getElementById("editName").value.trim();
+      const newKittens = parseInt(document.getElementById("editKittens").value.trim());
+      const newAdults = parseInt(document.getElementById("editAdults").value.trim());
+
+      const oldData = volunteers[editingVolunteer];
+      delete volunteers[editingVolunteer];
 
       volunteers[newName] = {
-        maxKittens: parseInt(newKittens),
-        maxAdults: parseInt(newAdults),
-        cats: data.cats
+        maxKittens: newKittens,
+        maxAdults: newAdults,
+        cats: oldData.cats
       };
 
       saveData();
+      closeModal();
       renderTable();
     }
 
