@@ -12,38 +12,50 @@
     }
     header {
       background: linear-gradient(to right, #fceabb, #f8b500);
-      padding: 20px;
-      text-align: center;
-      font-size: 1.8em;
-      font-weight: bold;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       color: #333;
-      letter-spacing: 0.05em;
-    }
-    main {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-    section {
-      background: #ffffffcc;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      padding: 20px;
-    }
-    h2 {
+      font-weight: bold;
       font-size: 1.4em;
-      color: #444;
-      border-bottom: 2px solid #f8b500;
-      padding-bottom: 5px;
-      margin-bottom: 15px;
+    }
+    /* ハンバーガーメニュー */
+    .menu-icon {
+      cursor: pointer;
+      font-size: 1.6em;
+    }
+    nav {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 250px;
+      z-index: 100;
+    }
+    nav.active {
+      display: block;
+    }
+    nav h3 {
+      background: #f8b500;
+      color: white;
+      margin: 0;
+      padding: 10px;
+      border-radius: 8px 8px 0 0;
+    }
+    nav form {
+      padding: 10px;
     }
     label {
       display: block;
       margin: 8px 0;
     }
     input[type="text"], select {
-      width: 250px;
+      width: 100%;
       padding: 6px;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -59,6 +71,18 @@
     }
     button:hover {
       background-color: #e0a800;
+    }
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      font-size: 1.4em;
+      color: #444;
+      border-bottom: 2px solid #f8b500;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
     }
     table {
       width: 100%;
@@ -80,62 +104,68 @@
   </style>
 </head>
 <body>
-  <header>保護猫ボランティア管理</header>
+  <header>
+    保護猫ボランティア管理
+    <div class="menu-icon" id="menuIcon">☰</div>
+  </header>
+
+  <!-- ハンバーガーメニュー -->
+  <nav id="menu">
+    <h3>メニュー</h3>
+    <form id="volunteerForm">
+      <h4>預かりボランティアさんの登録</h4>
+      <label>ボランティアさんの名前：
+        <input type="text" id="volunteerName" required>
+      </label>
+      <label>預かりMAX頭数：
+        <input type="text" id="maxCats" required>
+      </label>
+      <button type="submit">ボランティアを追加</button>
+    </form>
+    <form id="catForm">
+      <h4>猫の登録</h4>
+      <label>ボランティアさんの名前：
+        <select id="catVolunteerName" required>
+          <option value="">選択してください</option>
+        </select>
+      </label>
+      <label>猫のチーム名：
+        <input type="text" id="catTeamName" required>
+      </label>
+      <label>猫の名前：
+        <input type="text" id="catName" required>
+      </label>
+      <button type="submit">猫を追加</button>
+    </form>
+  </nav>
+
   <main>
-    <section>
-      <h2>預かりボランティアさんの登録</h2>
-      <form id="volunteerForm">
-        <label>ボランティアさんの名前：
-          <input type="text" id="volunteerName" required>
-        </label>
-        <label>預かりMAX頭数：
-          <input type="text" id="maxCats" required>
-        </label>
-        <button type="submit">ボランティアを追加</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>猫の登録</h2>
-      <form id="catForm">
-        <label>ボランティアさんの名前：
-          <select id="catVolunteerName" required>
-            <option value="">選択してください</option>
-          </select>
-        </label>
-        <label>猫のチーム名：
-          <input type="text" id="catTeamName" required>
-        </label>
-        <label>猫の名前：
-          <input type="text" id="catName" required>
-        </label>
-        <button type="submit">猫を追加</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>預かり猫一覧</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ボランティアさんの名前</th>
-            <th>預かり頭数</th>
-            <th>預かりMAX頭数</th>
-            <th>猫一覧（チーム名＋猫の名前）</th>
-          </tr>
-        </thead>
-        <tbody id="volunteerTableBody"></tbody>
-      </table>
-    </section>
+    <h2>預かり猫一覧</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ボランティアさんの名前</th>
+          <th>預かり頭数</th>
+          <th>預かりMAX頭数</th>
+          <th>猫一覧（チーム名＋猫の名前）</th>
+        </tr>
+      </thead>
+      <tbody id="volunteerTableBody"></tbody>
+    </table>
   </main>
 
   <script>
-    const volunteers = {}; // { name: { max: number, cats: [] } }
-
+    const volunteers = {};
     const volunteerForm = document.getElementById('volunteerForm');
     const catForm = document.getElementById('catForm');
     const volunteerTableBody = document.getElementById('volunteerTableBody');
     const catVolunteerSelect = document.getElementById('catVolunteerName');
+    const menuIcon = document.getElementById('menuIcon');
+    const menu = document.getElementById('menu');
+
+    menuIcon.addEventListener('click', () => {
+      menu.classList.toggle('active');
+    });
 
     volunteerForm.addEventListener('submit', e => {
       e.preventDefault();
