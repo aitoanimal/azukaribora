@@ -241,6 +241,20 @@
 
   <script>
     const volunteers = {};
+
+    function saveData() {
+      localStorage.setItem("volunteers", JSON.stringify(volunteers));
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem("volunteers");
+      if (saved) {
+        Object.assign(volunteers, JSON.parse(saved));
+      }
+    }
+
+    loadData();
+
     const volunteerForm = document.getElementById('volunteerForm');
     const catForm = document.getElementById('catForm');
     const volunteerTableBody = document.getElementById('volunteerTableBody');
@@ -272,6 +286,7 @@
         option.textContent = name;
         catVolunteerSelect.appendChild(option);
 
+        saveData();
         renderTable();
       } else {
         alert('このボランティアさんは既に登録されています。');
@@ -295,6 +310,7 @@
         name: catName
       });
 
+      saveData();
       renderTable();
 
       document.getElementById('catTeamName').value = '';
@@ -328,10 +344,23 @@
 
         volunteerTableBody.appendChild(tr);
       });
+
+      updateVolunteerSelect();
+    }
+
+    function updateVolunteerSelect() {
+      catVolunteerSelect.innerHTML = '<option value="">選択してください</option>';
+      Object.keys(volunteers).forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        catVolunteerSelect.appendChild(option);
+      });
     }
 
     function deleteCat(volName, index) {
       volunteers[volName].cats.splice(index, 1);
+      saveData();
       renderTable();
     }
 
@@ -353,12 +382,11 @@
         cats: data.cats
       };
 
-      [...catVolunteerSelect.options].forEach(opt => {
-        if (opt.value === volName) opt.value = opt.textContent = newName;
-      });
-
+      saveData();
       renderTable();
     }
+
+    renderTable();
   </script>
 </body>
 </html>
