@@ -51,8 +51,6 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       width: 300px;
       z-index: 2000;
-
-      /* ← ここを追加してスクロール可能にする */
       max-height: 70vh;
       overflow-y: auto;
     }
@@ -138,7 +136,7 @@
       border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-      min-width: 600px;
+      min-width: 700px;
     }
 
     th, td {
@@ -146,6 +144,7 @@
       text-align: left;
       border-bottom: 1px solid #f7f1e6;
       font-size: 0.95em;
+      vertical-align: top;
     }
 
     th {
@@ -154,29 +153,29 @@
       color: #d08c5b;
     }
 
-    td:last-child {
-      font-size: 0.9em;
-      color: #666;
+    .edit-btn, .delete-btn {
+      background: #f7c8a5;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85em;
+      color: #fff;
+      margin-top: 6px;
     }
 
-    tr:last-child td {
-      border-bottom: none;
+    .delete-btn {
+      background: #e38b8b;
     }
 
-    @media (max-width: 600px) {
-      header .title {
-        font-size: 1.3em;
-      }
-
-      table, th, td {
-        font-size: 0.85em;
-      }
-
-      nav {
-        width: 90%;
-        right: 5%;
-      }
+    .edit-btn:hover {
+      background: #f3b48c;
     }
+
+    .delete-btn:hover {
+      background: #d66f6f;
+    }
+
   </style>
 </head>
 
@@ -191,11 +190,15 @@
 
     <form id="volunteerForm">
       <h4>預かりボランティアさんの登録</h4>
+
       <label>ボランティアさんの名前：</label>
       <input type="text" id="volunteerName" required>
 
-      <label>預かりMAX頭数：</label>
-      <input type="text" id="maxCats" required>
+      <label>子猫MAX頭数：</label>
+      <input type="text" id="maxKittens" required>
+
+      <label>成猫MAX頭数：</label>
+      <input type="text" id="maxAdults" required>
 
       <button type="submit">追加</button>
     </form>
@@ -225,9 +228,11 @@
       <thead>
         <tr>
           <th>ボランティアさん</th>
+          <th>子猫MAX</th>
+          <th>成猫MAX</th>
           <th>預かり頭数</th>
-          <th>MAX頭数</th>
           <th>猫一覧</th>
+          <th>編集</th>
         </tr>
       </thead>
       <tbody id="volunteerTableBody"></tbody>
@@ -250,22 +255,31 @@
     volunteerForm.addEventListener('submit', e => {
       e.preventDefault();
       const name = document.getElementById('volunteerName').value.trim();
-      const maxCats = document.getElementById('maxCats').value.trim();
-      if (!name || !maxCats) return;
+      const maxKittens = document.getElementById('maxKittens').value.trim();
+      const maxAdults = document.getElementById('maxAdults').value.trim();
+
+      if (!name || !maxKittens || !maxAdults) return;
 
       if (!volunteers[name]) {
-        volunteers[name] = { max: parseInt(maxCats), cats: [] };
+        volunteers[name] = {
+          maxKittens: parseInt(maxKittens),
+          maxAdults: parseInt(maxAdults),
+          cats: []
+        };
+
         const option = document.createElement('option');
         option.value = name;
         option.textContent = name;
         catVolunteerSelect.appendChild(option);
+
         renderTable();
       } else {
         alert('このボランティアさんは既に登録されています。');
       }
 
       document.getElementById('volunteerName').value = '';
-      document.getElementById('maxCats').value = '';
+      document.getElementById('maxKittens').value = '';
+      document.getElementById('maxAdults').value = '';
     });
 
     catForm.addEventListener('submit', e => {
@@ -276,7 +290,11 @@
 
       if (!volunteerName || !teamName || !catName) return;
 
-      volunteers[volunteerName].cats.push({ team: teamName, name: catName });
+      volunteers[volunteerName].cats.push({
+        team: teamName,
+        name: catName
+      });
+
       renderTable();
 
       document.getElementById('catTeamName').value = '';
@@ -285,19 +303,61 @@
 
     function renderTable() {
       volunteerTableBody.innerHTML = '';
+
       Object.keys(volunteers).forEach(volName => {
         const data = volunteers[volName];
         const tr = document.createElement('tr');
 
+        const catsHTML = data.cats
+          .map((cat, index) =>
+            `${cat.team} / ${cat.name} 
+             <button class="delete-btn" onclick="deleteCat('${volName}', ${index})">削除</button>`
+          )
+          .join("<br>");
+
         tr.innerHTML = `
           <td>${volName}</td>
+          <td>${data.maxKittens}</td>
+          <td>${data.maxAdults}</td>
           <td>${data.cats.length}</td>
-          <td>${data.max}</td>
-          <td>${data.cats.length ? data.cats.map(cat => `${cat.team} / ${cat.name}`).join('、 ') : 'なし'}</td>
+          <td>${catsHTML || 'なし'}</td>
+          <td>
+            <button class="edit-btn" onclick="editVolunteer('${volName}')">編集</button>
+          </td>
         `;
 
         volunteerTableBody.appendChild(tr);
       });
+    }
+
+    function deleteCat(volName, index) {
+      volunteers[volName].cats.splice(index, 1);
+      renderTable();
+    }
+
+    function editVolunteer(volName) {
+      const newName = prompt("新しい名前を入力してください", volName);
+      if (!newName) return;
+
+      const newKittens = prompt("子猫MAX頭数を入力してください", volunteers[volName].maxKittens);
+      const newAdults = prompt("成猫MAX頭数を入力してください", volunteers[volName].maxAdults);
+
+      if (!newKittens || !newAdults) return;
+
+      const data = volunteers[volName];
+      delete volunteers[volName];
+
+      volunteers[newName] = {
+        maxKittens: parseInt(newKittens),
+        maxAdults: parseInt(newAdults),
+        cats: data.cats
+      };
+
+      [...catVolunteerSelect.options].forEach(opt => {
+        if (opt.value === volName) opt.value = opt.textContent = newName;
+      });
+
+      renderTable();
     }
   </script>
 </body>
